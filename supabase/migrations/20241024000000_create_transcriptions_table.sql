@@ -17,6 +17,12 @@ CREATE INDEX IF NOT EXISTS idx_transcriptions_created_at ON public.transcription
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.transcriptions ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own transcriptions" ON public.transcriptions;
+DROP POLICY IF EXISTS "Users can insert their own transcriptions" ON public.transcriptions;
+DROP POLICY IF EXISTS "Users can update their own transcriptions" ON public.transcriptions;
+DROP POLICY IF EXISTS "Users can delete their own transcriptions" ON public.transcriptions;
+
 -- Create policy to allow users to read their own transcriptions
 CREATE POLICY "Users can view their own transcriptions"
   ON public.transcriptions

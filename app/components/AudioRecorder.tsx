@@ -1,118 +1,153 @@
 // components/AudioRecorder.tsx
-'use client';
+'use client'
 
-import { useState, useRef } from 'react';
+import { useState, useRef } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import MicIcon from '@mui/icons-material/Mic'
+import StopIcon from '@mui/icons-material/Stop'
+import ReportViewer from './reports/ReportViewer'
+import { mockCarePlanReport } from '@/app/lib/mockData'
+import { CarePlanReport } from '@/app/lib/types'
 
 export default function AudioRecorder() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcription, setTranscription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false)
+  const [transcription, setTranscription] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm', // または 'audio/mp4'
-      });
+        mimeType: 'audio/webm',
+      })
 
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
 
       mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+        audioChunksRef.current.push(event.data)
+      }
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: 'audio/webm',
-        });
-        await transcribeAudio(audioBlob);
-        
-        // ストリーム停止
-        stream.getTracks().forEach(track => track.stop());
-      };
+        })
+        await transcribeAudio(audioBlob)
 
-      mediaRecorder.start();
-      setIsRecording(true);
+        // ストリーム停止
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorder.start()
+      setIsRecording(true)
+      setShowReport(false)
     } catch (error) {
-      console.error('Recording error:', error);
-      alert('マイクへのアクセスが拒否されました');
+      console.error('Recording error:', error)
+      alert('マイクへのアクセスが拒否されました')
     }
-  };
+  }
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
     }
-  };
+  }
 
   const transcribeAudio = async (audioBlob: Blob) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
-      formData.append('userId', 'user-123'); // 実際のユーザーID
+      // モック: 実際のAPI呼び出しの代わりにモックデータを表示
+      // 実際の実装では以下のコードを使用
+      /*
+      const formData = new FormData()
+      formData.append('audio', audioBlob, 'recording.webm')
+      formData.append('userId', 'user-123')
 
       const response = await fetch('/api/transcribe', {
         method: 'POST',
         body: formData,
-      });
+      })
 
-      const data = await response.json();
-      
+      const data = await response.json()
+
       if (data.success) {
-        setTranscription(data.transcription);
+        setTranscription(data.transcription)
       } else {
-        alert('文字起こしに失敗しました');
+        alert('文字起こしに失敗しました')
       }
+      */
+
+      // モック処理（2秒待機してからモックデータを表示）
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      setTranscription('音声認識が完了しました。居宅サービス計画書を生成しました。')
+      setShowReport(true)
     } catch (error) {
-      console.error('Transcription error:', error);
-      alert('エラーが発生しました');
+      console.error('Transcription error:', error)
+      alert('エラーが発生しました')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <div className="flex gap-4 mb-6">
-        <button
+    <Box>
+      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<MicIcon />}
           onClick={startRecording}
           disabled={isRecording || isLoading}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          size="large"
         >
-          🎤 録音開始
-        </button>
-        <button
+          録音開始
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          startIcon={<StopIcon />}
           onClick={stopRecording}
           disabled={!isRecording}
-          className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+          size="large"
         >
-          ⏹️ 録音停止
-        </button>
-      </div>
+          録音停止
+        </Button>
+      </Box>
 
       {isRecording && (
-        <div className="mb-4 text-red-500 font-bold">
+        <Alert severity="error" sx={{ mb: 3 }}>
           🔴 録音中...
-        </div>
+        </Alert>
       )}
 
       {isLoading && (
-        <div className="mb-4 text-blue-500">
-          文字起こし処理中...
-        </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <CircularProgress size={24} />
+          <Alert severity="info" sx={{ flexGrow: 1 }}>
+            文字起こし処理中...
+          </Alert>
+        </Box>
       )}
 
-      {transcription && (
-        <div className="border p-4 rounded bg-gray-50">
-          <h3 className="font-bold mb-2">文字起こし結果:</h3>
-          <p className="whitespace-pre-wrap">{transcription}</p>
-        </div>
+      {transcription && !showReport && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          {transcription}
+        </Alert>
       )}
-    </div>
-  );
+
+      {showReport && (
+        <Box sx={{ mt: 4 }}>
+          <ReportViewer report={mockCarePlanReport as CarePlanReport} />
+        </Box>
+      )}
+    </Box>
+  )
 }
