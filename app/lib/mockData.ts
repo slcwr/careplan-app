@@ -78,6 +78,77 @@ export const mockCarePlanReport: Partial<CarePlanReport> = {
 ・趣味の園芸を続けたい
   `.trim(),
 
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  created_at: new Date('2024-10-20').toISOString(),
+  updated_at: new Date('2024-10-20').toISOString(),
 }
+
+// レポート一覧用のモックデータ
+export const mockCarePlanReports: CarePlanReport[] = [
+  {
+    ...mockCarePlanReport,
+    id: 'report-001',
+    client_name: '山田 太郎',
+    client_age: 78,
+    care_level: '要介護2',
+    created_at: new Date('2024-10-20').toISOString(),
+    updated_at: new Date('2024-10-20').toISOString(),
+  } as CarePlanReport,
+  {
+    id: 'report-002',
+    transcription_id: null,
+    user_id: 'user-123',
+    client_name: '佐藤 花子',
+    client_age: 82,
+    care_level: '要介護3',
+    life_issues: '認知症の進行により、日常生活動作に見守りが必要',
+    needs: ['認知症ケアの充実', '安全な生活環境の確保', '家族の介護負担軽減'],
+    long_term_goal: '認知症の進行を緩やかにし、穏やかな日常生活を送る',
+    short_term_goals: ['デイサービスでの活動に参加する', '服薬管理のサポートを受ける'],
+    services: [
+      {
+        type: '訪問介護',
+        provider: 'ひまわり介護サービス',
+        frequency: '週5回',
+        duration: '各回2時間、6ヶ月間',
+      },
+      {
+        type: '認知症対応型デイサービス',
+        provider: 'もみじデイサービスセンター',
+        frequency: '週3回',
+        duration: '各回5時間、6ヶ月間',
+      },
+    ],
+    remarks: '家族との連携を密にして、安心できる環境づくりを心がける',
+    created_at: new Date('2024-10-18').toISOString(),
+    updated_at: new Date('2024-10-18').toISOString(),
+  },
+  {
+    id: 'report-003',
+    transcription_id: null,
+    user_id: 'user-123',
+    client_name: '鈴木 一郎',
+    client_age: 75,
+    care_level: '要介護1',
+    life_issues: '脳卒中後のリハビリが必要',
+    needs: ['歩行能力の回復', '日常生活動作の自立支援'],
+    long_term_goal: '杖なしで歩行できるようになる',
+    short_term_goals: ['リハビリを継続する', '筋力を維持する'],
+    services: [
+      {
+        type: '訪問リハビリテーション',
+        provider: 'さくらリハビリステーション',
+        frequency: '週2回',
+        duration: '各回60分、6ヶ月間',
+      },
+      {
+        type: 'デイサービス',
+        provider: 'すみれデイサービスセンター',
+        frequency: '週1回',
+        duration: '各回6時間、6ヶ月間',
+      },
+    ],
+    remarks: '本人の意欲が高く、積極的にリハビリに取り組んでいる',
+    created_at: new Date('2024-10-15').toISOString(),
+    updated_at: new Date('2024-10-15').toISOString(),
+  },
+]

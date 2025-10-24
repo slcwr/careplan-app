@@ -1,20 +1,88 @@
 // レポート一覧ページ
 
+'use client'
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardActions from '@mui/material/CardActions'
+import Chip from '@mui/material/Chip'
+import AddIcon from '@mui/icons-material/Add'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import { mockCarePlanReports } from '@/app/lib/mockData'
+
 export default function ReportsPage() {
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">居宅サービス計画書</h1>
-        <a
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          居宅サービス計画書
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
           href="/reports/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           新規作成
-        </a>
-      </div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-500">レポート一覧がここに表示されます</p>
-      </div>
-    </div>
+        </Button>
+      </Box>
+
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            md: 'repeat(2, 1fr)',
+            lg: 'repeat(3, 1fr)',
+          },
+          gap: 3,
+        }}
+      >
+        {mockCarePlanReports.map((report) => (
+          <Card key={report.id} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                <Typography variant="h6" component="h2">
+                  {report.client_name}
+                </Typography>
+                <Chip
+                  label={report.care_level}
+                  color="primary"
+                  size="small"
+                />
+              </Box>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {report.client_age}歳
+              </Typography>
+              {report.long_term_goal && (
+                <Typography variant="body2" sx={{ mt: 2 }} noWrap>
+                  目標: {report.long_term_goal}
+                </Typography>
+              )}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  サービス数: {report.services.length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(report.created_at).toLocaleDateString('ja-JP')}
+                </Typography>
+              </Box>
+            </CardContent>
+            <CardActions>
+              <Button
+                size="small"
+                startIcon={<VisibilityIcon />}
+                href={`/reports/${report.id}`}
+                fullWidth
+              >
+                詳細を見る
+              </Button>
+            </CardActions>
+          </Card>
+        ))}
+      </Box>
+    </Box>
   )
 }

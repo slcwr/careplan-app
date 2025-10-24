@@ -1,12 +1,25 @@
 // 新規レポート作成ページ
 
+'use client'
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+
 export default function ReportNewPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">新規計画書作成</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-500">新規作成フォームがここに表示されます</p>
-      </div>
-    </div>
+    <Box>
+      <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+        新規計画書作成
+      </Typography>
+      <Card>
+        <CardContent>
+          <Typography color="text.secondary">
+            新規作成フォームがここに表示されます
+          </Typography>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }

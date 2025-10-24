@@ -1,12 +1,18 @@
 // 録音ページ
 
+'use client'
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import AudioRecorder from '@/app/components/AudioRecorder'
 
 export default function RecordPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">音声録音</h1>
+    <Box>
+      <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+        音声録音
+      </Typography>
       <AudioRecorder />
-    </div>
+    </Box>
   )
 }

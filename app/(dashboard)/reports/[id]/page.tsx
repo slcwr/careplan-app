@@ -1,33 +1,67 @@
 // 個別レポート表示ページ
 
+'use client'
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import EditIcon from '@mui/icons-material/Edit'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ReportViewer from '@/app/components/reports/ReportViewer'
+import { mockCarePlanReports } from '@/app/lib/mockData'
+import { CarePlanReport } from '@/app/lib/types'
+
 export default function ReportDetailPage({
   params,
 }: {
   params: { id: string }
 }) {
+  // IDに基づいてモックデータから該当レポートを取得
+  const report = mockCarePlanReports.find(r => r.id === params.id)
+
+  // レポートが見つからない場合
+  if (!report) {
+    return (
+      <Box>
+        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+          レポートが見つかりません
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          href="/reports"
+        >
+          一覧に戻る
+        </Button>
+      </Box>
+    )
+  }
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">居宅サービス計画書</h1>
-        <div className="flex gap-2">
-          <a
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          居宅サービス計画書
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<EditIcon />}
             href={`/reports/${params.id}/edit`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             編集
-          </a>
-          <a
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
             href="/reports"
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
           >
             一覧に戻る
-          </a>
-        </div>
-      </div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-500">レポートID: {params.id}</p>
-        <p className="text-gray-500">レポート詳細がここに表示されます</p>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Box>
+
+      <ReportViewer report={report as CarePlanReport} />
+    </Box>
   )
 }

@@ -1,13 +1,28 @@
 // ダッシュボード - 文字起こし一覧
 
+'use client'
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+
 export default function DashboardPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">ダッシュボード</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">最近の文字起こし</h2>
-        <p className="text-gray-500">文字起こし履歴がここに表示されます</p>
-      </div>
-    </div>
+    <Box>
+      <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+        ダッシュボード
+      </Typography>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            最近の文字起こし
+          </Typography>
+          <Typography color="text.secondary">
+            文字起こし履歴がここに表示されます
+          </Typography>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
