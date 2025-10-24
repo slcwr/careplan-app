@@ -28,8 +28,8 @@ export async function POST(request: Request) {
     // Speech-to-Text API呼び出し
     const [response] = await speechClient.recognize({
       config: {
-        encoding: 'LINEAR16', // または 'MP3', 'WEBM_OPUS' など
-        sampleRateHertz: 16000,
+        encoding: 'WEBM_OPUS',
+        sampleRateHertz: 48000,
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true, // 句読点の自動挿入
         model: 'default', // または 'medical_conversation' for 医療特化
