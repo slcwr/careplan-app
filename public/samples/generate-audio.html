@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声サンプル生成ツール</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #1976d2;
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            line-height: 1.8;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        .output {
+            font-size: 12px;
+            color: #666;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #1976d2;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>音声サンプル生成ツール</h1>
+
+        <div class="info">
+            <strong>使い方:</strong><br>
+            1. 下のテキストエリアにスクリプトを貼り付けます<br>
+            2. 「音声を再生」で確認します<br>
+            3. 「録音開始」→「録音停止」でWEBMファイルを生成します<br>
+            4. ダウンロードボタンでファイルを保存します
+        </div>
+
+        <div class="warning">
+            <strong>注意:</strong> このツールは簡易的なテストツールです。ブラウザのText-to-Speech機能を使用しており、音質は高くありません。高品質な音声が必要な場合はVOICEVOXを使用してください。
+        </div>
+
+        <div>
+            <h3>スクリプト選択:</h3>
+            <button onclick="loadScript(1)">スクリプト1（山田太郎様）</button>
+            <button onclick="loadScript(2)">スクリプト2（佐藤花子様）</button>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>テキスト:</h3>
+            <textarea id="textInput" placeholder="ここにテキストを入力してください..."></textarea>
+        </div>
+
+        <div class="controls">
+            <h3>音声設定:</h3>
+            <div class="control-group">
+                <label>速度:</label>
+                <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+                <span id="rateValue" class="output">1.0</span>
+            </div>
+            <div class="control-group">
+                <label>ピッチ:</label>
+                <input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
+                <span id="pitchValue" class="output">1.0</span>
+            </div>
+            <div class="control-group">
+                <label>音量:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="1">
+                <span id="volumeValue" class="output">1.0</span>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="speakText()">音声を再生</button>
+            <button onclick="stopSpeaking()">停止</button>
+            <button onclick="startRecording()" id="recordBtn">録音開始</button>
+            <button onclick="stopRecording()" id="stopBtn" disabled>録音停止</button>
+            <button onclick="downloadRecording()" id="downloadBtn" disabled>ダウンロード</button>
+        </div>
+
+        <div id="status" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px; min-height: 20px;"></div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+
+        // スクリプトデータ
+        const scripts = {
+            1: `居宅サービス計画書の作成依頼です。
+
+利用者情報
+お名前は山田太郎様、78歳の男性です。
+要介護度は要介護2です。
+
+生活課題
+自宅での転倒リスクが高く、特に夜間のトイレ移動時に不安があります。
+また、軽度の認知症があり、服薬管理が困難な状況です。
+家族は日中仕事のため、見守りができない時間帯があります。
+
+長期目標
+安全に自宅で生活を継続できることを目標とします。
+期間は6ヶ月とします。
+
+短期目標
+1つ目は、転倒せずに安全に移動できるようになること。期間は3ヶ月です。
+2つ目は、適切な服薬管理ができるようになること。こちらも期間は3ヶ月です。
+
+サービス内容
+訪問介護を週3回、月水金の午前中に利用します。内容は、服薬確認と生活援助です。
+通所介護を週2回、火木に利用します。機能訓練と入浴介助を行います。
+福祉用具として、手すりの設置とポータブルトイレのレンタルを提案します。
+
+備考
+ご家族との連絡は、長女の携帯電話でお願いします。
+緊急時の連絡先も同じく長女の番号となります。
+
+以上で、居宅サービス計画書の内容となります。`,
+            2: `居宅サービス計画書、2件目の記録を開始します。
+
+基本情報
+利用者は佐藤花子様、85歳、女性です。
+要介護認定は要介護3となっています。
+
+現在の状況と課題
+脳梗塞の後遺症により、右半身に麻痺があります。
+食事は自力で摂取できますが、時間がかかります。
+入浴は全介助が必要な状態です。
+夫は87歳で、介護力に限界が見えてきています。
+
+長期目標としては
+在宅での生活を継続し、可能な限り自立した日常生活を送ることです。
+目標期間は6ヶ月とします。
+
+短期目標は3つあります
+1番目、安全に入浴できる環境を整えること。3ヶ月の目標です。
+2番目、食事動作の改善を図ること。3ヶ月です。
+3番目、介護者である夫の負担を軽減すること。同じく3ヶ月の目標です。
+
+導入するサービスについて
+訪問介護は週4回。月火木金の午前と夕方に分けて利用します。
+入浴介助と食事介助、生活援助を行います。
+訪問看護は週1回、水曜日に利用。健康状態の確認と服薬管理を行います。
+通所リハビリテーションは週2回、水土曜日に利用します。
+理学療法士による機能訓練を中心に実施します。
+
+福祉用具について
+介護用ベッド、車椅子、シャワーチェアをレンタルします。
+手すりの設置も検討しています。
+
+その他の留意事項
+ご主人の体調にも配慮が必要です。
+定期的にケアマネージャーが訪問し、状況確認を行います。
+
+以上が、佐藤様の居宅サービス計画書の内容です。`
+        };
+
+        function loadScript(num) {
+            document.getElementById('textInput').value = scripts[num];
+            setStatus(`スクリプト${num}を読み込みました`);
+        }
+
+        // スライダーの値を表示
+        document.getElementById('rate').addEventListener('input', (e) => {
+            document.getElementById('rateValue').textContent = e.target.value;
+        });
+        document.getElementById('pitch').addEventListener('input', (e) => {
+            document.getElementById('pitchValue').textContent = e.target.value;
+        });
+        document.getElementById('volume').addEventListener('input', (e) => {
+            document.getElementById('volumeValue').textContent = e.target.value;
+        });
+
+        function speakText() {
+            const text = document.getElementById('textInput').value;
+            if (!text) {
+                alert('テキストを入力してください');
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = parseFloat(document.getElementById('rate').value);
+            utterance.pitch = parseFloat(document.getElementById('pitch').value);
+            utterance.volume = parseFloat(document.getElementById('volume').value);
+
+            utterance.onstart = () => setStatus('音声再生中...');
+            utterance.onend = () => setStatus('音声再生完了');
+            utterance.onerror = (e) => setStatus('エラー: ' + e.error);
+
+            speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeaking() {
+            speechSynthesis.cancel();
+            setStatus('音声停止');
+        }
+
+        async function startRecording() {
+            const text = document.getElementById('textInput').value;
+            if (!text) {
+                alert('テキストを入力してください');
+                return;
+            }
+
+            audioChunks = [];
+
+            try {
+                // マイクストリームを取得（実際にはスピーカー出力をキャプチャしたいが、ブラウザの制限あり）
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                    setStatus(`録音完了 (${(audioBlob.size / 1024).toFixed(2)} KB)`);
+                    document.getElementById('downloadBtn').disabled = false;
+
+                    // ストリームを停止
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                setStatus('録音中... 音声を再生してください');
+
+                // 自動的に音声を再生
+                setTimeout(() => speakText(), 500);
+
+            } catch (error) {
+                setStatus('エラー: ' + error.message);
+                console.error('Recording error:', error);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                speechSynthesis.cancel();
+                document.getElementById('recordBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        function downloadRecording() {
+            if (!audioBlob) {
+                alert('録音データがありません');
+                return;
+            }
+
+            const url = URL.createObjectURL(audioBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `care-plan-sample-${Date.now()}.webm`;
+            a.click();
+            URL.revokeObjectURL(url);
+            setStatus('ファイルをダウンロードしました');
+        }
+
+        function setStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        // 初期スクリプトを読み込み
+        loadScript(1);
+    </script>
+</body>
+</html>
