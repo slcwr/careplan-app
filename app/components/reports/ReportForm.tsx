@@ -18,9 +18,11 @@ interface ReportFormProps {
   initialData?: Partial<CarePlanReport>
   onSubmit: (data: Partial<CarePlanReport>) => void
   isLoading?: boolean
+  submitLabel?: string
+  disabled?: boolean
 }
 
-export default function ReportForm({ initialData, onSubmit, isLoading }: ReportFormProps) {
+export default function ReportForm({ initialData, onSubmit, isLoading, submitLabel, disabled }: ReportFormProps) {
   const [formData, setFormData] = useState({
     client_name: initialData?.client_name ?? '',
     client_age: initialData?.client_age?.toString() ?? '',
@@ -130,7 +132,7 @@ export default function ReportForm({ initialData, onSubmit, isLoading }: ReportF
           variant="outlined"
           startIcon={<CancelIcon />}
           href="/reports"
-          disabled={isLoading}
+          disabled={isLoading || disabled}
         >
           キャンセル
         </Button>
@@ -138,9 +140,9 @@ export default function ReportForm({ initialData, onSubmit, isLoading }: ReportF
           type="submit"
           variant="contained"
           startIcon={<SaveIcon />}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
         >
-          {isLoading ? '保存中...' : '保存'}
+          {submitLabel || (isLoading ? '保存中...' : '保存')}
         </Button>
       </Box>
     </form>
