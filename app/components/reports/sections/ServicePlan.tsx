@@ -18,13 +18,10 @@ export default function ServicePlan({ services }: ServicePlanProps) {
                 サービス種類
               </th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                事業者
-              </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 頻度
               </th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                期間
+                詳細
               </th>
             </tr>
           </thead>
@@ -32,9 +29,8 @@ export default function ServicePlan({ services }: ServicePlanProps) {
             {services.map((service, index) => (
               <tr key={index}>
                 <td className="px-4 py-2">{service.type}</td>
-                <td className="px-4 py-2">{service.provider}</td>
                 <td className="px-4 py-2">{service.frequency}</td>
-                <td className="px-4 py-2">{service.duration}</td>
+                <td className="px-4 py-2">{service.details}</td>
               </tr>
             ))}
           </tbody>

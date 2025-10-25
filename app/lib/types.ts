@@ -21,14 +21,18 @@ export interface CarePlanReport {
 
   // 生活課題・ニーズ
   life_issues: string | null
-  needs: string[]
+  needs: NeedItem[]
 
   // 目標
   long_term_goal: string | null
+  long_term_goal_period: string | null
   short_term_goals: string[]
 
   // サービス内容
   services: ServiceItem[]
+
+  // 福祉用具
+  equipment: string | null
 
   // その他
   remarks: string | null
@@ -36,9 +40,13 @@ export interface CarePlanReport {
   updated_at: string
 }
 
+export interface NeedItem {
+  content: string  // 目標内容
+  period: string   // 期間
+}
+
 export interface ServiceItem {
   type: string        // サービス種類
-  provider: string    // 事業者
   frequency: string   // 頻度
-  duration: string    // 期間
+  details: string     // 詳細内容
 }

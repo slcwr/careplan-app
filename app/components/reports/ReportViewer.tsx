@@ -87,7 +87,7 @@ export default function ReportViewer({ report }: ReportViewerProps) {
             <Box component="ul" sx={{ mt: 1, pl: 3 }}>
               {report.needs.map((need, index) => (
                 <Typography component="li" variant="body2" key={index} sx={{ mb: 1 }}>
-                  {need}
+                  {need.content} ({need.period})
                 </Typography>
               ))}
             </Box>
@@ -141,17 +141,12 @@ export default function ReportViewer({ report }: ReportViewerProps) {
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" fontWeight="bold">
-                      事業者
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" fontWeight="bold">
                       頻度
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" fontWeight="bold">
-                      期間
+                      詳細
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -160,9 +155,8 @@ export default function ReportViewer({ report }: ReportViewerProps) {
                 {report.services.map((service, index) => (
                   <TableRow key={index} hover>
                     <TableCell>{service.type}</TableCell>
-                    <TableCell>{service.provider}</TableCell>
                     <TableCell>{service.frequency}</TableCell>
-                    <TableCell>{service.duration}</TableCell>
+                    <TableCell>{service.details}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

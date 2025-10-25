@@ -1,6 +1,7 @@
 // app/api/transcribe/route.ts
 import { SpeechClient } from '@google-cloud/speech';
 import { createClient } from '@supabase/supabase-js';
+import { extractCarePlanFromTranscription } from '@/app/lib/gemini';
 
 const speechClient = new SpeechClient({
   credentials: {
@@ -44,8 +45,13 @@ export async function POST(request: Request) {
       ?.map(result => result.alternatives?.[0]?.transcript)
       .join('\n') || '';
 
-    // Supabaseに保存
-    const { data, error } = await supabase
+    // Geminiを使って構造化データを抽出
+    console.log('Extracting structured data with Gemini...');
+    const extractedData = await extractCarePlanFromTranscription(transcription);
+    console.log('Extracted data:', extractedData);
+
+    // transcriptionsテーブルに保存
+    const { data: transcriptionData, error: transcriptionError } = await supabase
       .from('transcriptions')
       .insert({
         user_id: userId,
@@ -56,12 +62,40 @@ export async function POST(request: Request) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (transcriptionError) throw transcriptionError;
+
+    // care_plan_reportsテーブルに構造化データを保存
+    const { data: carePlanData, error: carePlanError } = await supabase
+      .from('care_plan_reports')
+      .insert({
+        user_id: userId,
+        transcription_id: transcriptionData.id,
+        client_name: extractedData.client_name,
+        client_age: extractedData.client_age,
+        care_level: extractedData.care_level,
+        life_issues: extractedData.life_issues,
+        long_term_goal: extractedData.long_term_goal,
+        long_term_goal_period: extractedData.long_term_goal_period,
+        needs: extractedData.needs,
+        services: extractedData.services,
+        equipment: extractedData.equipment,
+        remarks: extractedData.remarks,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (carePlanError) {
+      console.error('Error saving care plan:', carePlanError);
+      // transcriptionは保存できているので、エラーでも続行
+    }
 
     return Response.json({
       success: true,
       transcription,
-      data,
+      extractedData,
+      transcriptionData,
+      carePlanData,
     });
 
   } catch (error) {
