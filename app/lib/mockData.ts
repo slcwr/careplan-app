@@ -86,7 +86,7 @@ export const mockCarePlanReport: Partial<CarePlanReport> = {
 export const mockCarePlanReports: CarePlanReport[] = [
   {
     ...mockCarePlanReport,
-    id: 'report-001',
+    id: 'a0000000-0000-0000-0000-000000000001',
     client_name: '山田 太郎',
     client_age: 78,
     care_level: '要介護2',
@@ -94,7 +94,7 @@ export const mockCarePlanReports: CarePlanReport[] = [
     updated_at: new Date('2024-10-20').toISOString(),
   } as CarePlanReport,
   {
-    id: 'report-002',
+    id: 'a0000000-0000-0000-0000-000000000002',
     transcription_id: null,
     user_id: 'user-123',
     client_name: '佐藤 花子',
@@ -123,7 +123,7 @@ export const mockCarePlanReports: CarePlanReport[] = [
     updated_at: new Date('2024-10-18').toISOString(),
   },
   {
-    id: 'report-003',
+    id: 'a0000000-0000-0000-0000-000000000003',
     transcription_id: null,
     user_id: 'user-123',
     client_name: '鈴木 一郎',
