@@ -39,29 +39,33 @@ export default function ReportViewer({ report }: ReportViewerProps) {
                 氏名
               </Typography>
               <Typography variant="body1" fontWeight="medium">
-                {report.client_name}
+                {report.client?.name || '利用者情報なし'}
               </Typography>
             </Box>
-            <Box sx={{ flex: '1 1 200px' }}>
-              <Typography variant="caption" color="text.secondary">
-                年齢
-              </Typography>
-              <Typography variant="body1" fontWeight="medium">
-                {report.client_age}歳
-              </Typography>
-            </Box>
-            <Box sx={{ flex: '1 1 200px' }}>
-              <Typography variant="caption" color="text.secondary">
-                要介護度
-              </Typography>
-              <Box sx={{ mt: 0.5 }}>
-                <Chip
-                  label={report.care_level}
-                  color="primary"
-                  size="small"
-                />
+            {report.client?.birth_date && (
+              <Box sx={{ flex: '1 1 200px' }}>
+                <Typography variant="caption" color="text.secondary">
+                  年齢
+                </Typography>
+                <Typography variant="body1" fontWeight="medium">
+                  {new Date().getFullYear() - new Date(report.client.birth_date).getFullYear()}歳
+                </Typography>
               </Box>
-            </Box>
+            )}
+            {report.client?.care_level && (
+              <Box sx={{ flex: '1 1 200px' }}>
+                <Typography variant="caption" color="text.secondary">
+                  要介護度
+                </Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <Chip
+                    label={report.client.care_level}
+                    color="primary"
+                    size="small"
+                  />
+                </Box>
+              </Box>
+            )}
           </Box>
         </Box>
 

@@ -9,7 +9,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
-    let query = supabaseAdmin.from('care_plan_reports').select('*')
+    // clientsテーブルとJOINしてclient情報も取得
+    let query = supabaseAdmin
+      .from('care_plan_reports')
+      .select(`
+        *,
+        client:clients(*)
+      `)
 
     if (userId) {
       query = query.eq('user_id', userId)

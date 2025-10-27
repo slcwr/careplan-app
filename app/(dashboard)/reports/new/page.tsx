@@ -2,22 +2,49 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 import ReportForm from '@/app/components/reports/ReportForm'
 import { CarePlanReport } from '@/app/lib/types'
+import { createClient } from '@/app/lib/supabase/client'
 
 export default function ReportNewPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        setError('ログインが必要です')
+        setLoading(false)
+        return
+      }
+
+      setUserId(user.id)
+      setLoading(false)
+    }
+
+    checkAuth()
+  }, [])
 
   const handleSubmit = async (data: Partial<CarePlanReport>) => {
+    if (!userId) {
+      setError('ユーザー情報が取得できません')
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
@@ -29,7 +56,7 @@ export default function ReportNewPage() {
         },
         body: JSON.stringify({
           ...data,
-          user_id: 'user-123', // TODO: 実際のユーザーIDに置き換える
+          user_id: userId,
         }),
       })
 
@@ -47,6 +74,14 @@ export default function ReportNewPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
   return (
@@ -73,7 +108,7 @@ export default function ReportNewPage() {
       <ReportForm
         onSubmit={handleSubmit}
         submitLabel={submitting ? '作成中...' : '作成'}
-        disabled={submitting}
+        disabled={submitting || !userId}
       />
     </Box>
   )

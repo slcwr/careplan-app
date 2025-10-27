@@ -3,20 +3,23 @@
  */
 
 import { GoogleGenerativeAI, SchemaType, FunctionDeclaration } from '@google/generative-ai'
-import { CarePlanReport, NeedItem, ServiceItem } from './types'
+import { NeedItem, ServiceItem } from './types'
 
 // Function Calling の戻り値の型定義
-interface ExtractedCarePlanData {
+export interface ExtractedCarePlanData {
+  // 利用者情報（Clientテーブルに保存）
   client_name?: string
   client_age?: number
   care_level?: string
-  life_issues?: string
-  long_term_goal?: string
-  long_term_goal_period?: string
+
+  // ケアプラン情報（CarePlanReportテーブルに保存）
+  life_issues?: string | null
+  long_term_goal?: string | null
+  long_term_goal_period?: string | null
   needs?: NeedItem[]
   services?: ServiceItem[]
-  equipment?: string
-  remarks?: string
+  equipment?: string | null
+  remarks?: string | null
 }
 
 // Gemini API クライアントの初期化
@@ -112,7 +115,7 @@ const extractCarePlanFunction: FunctionDeclaration = {
  */
 export async function extractCarePlanFromTranscription(
   transcriptionText: string
-): Promise<Partial<CarePlanReport>> {
+): Promise<ExtractedCarePlanData> {
   try {
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
@@ -159,21 +162,8 @@ ${transcriptionText}
     // 抽出されたデータを型安全に返す
     const extractedData = functionCall.args as ExtractedCarePlanData
 
-    // データの型を整形（必要に応じて）
-    const carePlanData: Partial<CarePlanReport> = {
-      client_name: extractedData.client_name,
-      client_age: extractedData.client_age,
-      care_level: extractedData.care_level,
-      life_issues: extractedData.life_issues,
-      long_term_goal: extractedData.long_term_goal,
-      long_term_goal_period: extractedData.long_term_goal_period,
-      needs: extractedData.needs,
-      services: extractedData.services,
-      equipment: extractedData.equipment,
-      remarks: extractedData.remarks,
-    }
-
-    return carePlanData
+    // ExtractedCarePlanDataをそのまま返す
+    return extractedData
   } catch (error) {
     console.error('Error extracting care plan data with Gemini:', error)
     throw new Error('Failed to extract structured data from transcription')

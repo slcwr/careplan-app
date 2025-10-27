@@ -64,15 +64,48 @@ export async function POST(request: Request) {
 
     if (transcriptionError) throw transcriptionError;
 
+    // 利用者情報をclientsテーブルに保存（または既存の利用者を検索）
+    let clientId = null;
+    if (extractedData.client_name) {
+      // 既存の利用者を検索
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('name', extractedData.client_name)
+        .single();
+
+      if (existingClient) {
+        clientId = existingClient.id;
+      } else {
+        // 新規利用者として登録
+        const { data: newClient, error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            user_id: userId,
+            name: extractedData.client_name,
+            birth_date: extractedData.client_age
+              ? new Date(new Date().getFullYear() - extractedData.client_age, 0, 1).toISOString().split('T')[0]
+              : new Date('1950-01-01').toISOString().split('T')[0],
+            care_level: extractedData.care_level,
+            status: 'active',
+          })
+          .select('id')
+          .single();
+
+        if (!clientError && newClient) {
+          clientId = newClient.id;
+        }
+      }
+    }
+
     // care_plan_reportsテーブルに構造化データを保存
     const { data: carePlanData, error: carePlanError } = await supabase
       .from('care_plan_reports')
       .insert({
         user_id: userId,
         transcription_id: transcriptionData.id,
-        client_name: extractedData.client_name,
-        client_age: extractedData.client_age,
-        care_level: extractedData.care_level,
+        client_id: clientId,
         life_issues: extractedData.life_issues,
         long_term_goal: extractedData.long_term_goal,
         long_term_goal_period: extractedData.long_term_goal_period,
