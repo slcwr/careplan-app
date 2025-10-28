@@ -1,7 +1,7 @@
 // 利用者登録・編集ダイアログ
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +12,6 @@ import {
   MenuItem,
   Typography,
   Box,
-  Grid,
 } from '@mui/material'
 import { Client } from '@/app/lib/types'
 import { createClient as createSupabaseClient } from '@/app/lib/supabase/client'
@@ -35,22 +34,60 @@ const careLevels = [
 
 export default function ClientFormDialog({ open, onClose, client }: ClientFormDialogProps) {
   const [formData, setFormData] = useState({
-    name: client?.name || '',
-    name_kana: client?.name_kana || '',
-    birth_date: client?.birth_date || '',
-    gender: client?.gender || '',
-    address: client?.address || '',
-    phone: client?.phone || '',
-    email: client?.email || '',
-    care_level: client?.care_level || '',
-    insurance_number: client?.insurance_number || '',
-    certification_date: client?.certification_date || '',
-    certification_valid_from: client?.certification_valid_from || '',
-    certification_valid_to: client?.certification_valid_to || '',
-    notes: client?.notes || '',
+    name: '',
+    name_kana: '',
+    birth_date: '',
+    gender: '',
+    address: '',
+    phone: '',
+    email: '',
+    care_level: '',
+    insurance_number: '',
+    certification_date: '',
+    certification_valid_from: '',
+    certification_valid_to: '',
+    notes: '',
   })
 
   const [saving, setSaving] = useState(false)
+
+  // clientプロップが変更されたとき、またはダイアログが開かれたときにフォームを更新
+  useEffect(() => {
+    if (open && client) {
+      setFormData({
+        name: client.name || '',
+        name_kana: client.name_kana || '',
+        birth_date: client.birth_date || '',
+        gender: client.gender || '',
+        address: client.address || '',
+        phone: client.phone || '',
+        email: client.email || '',
+        care_level: client.care_level || '',
+        insurance_number: client.insurance_number || '',
+        certification_date: client.certification_date || '',
+        certification_valid_from: client.certification_valid_from || '',
+        certification_valid_to: client.certification_valid_to || '',
+        notes: client.notes || '',
+      })
+    } else if (open && !client) {
+      // 新規登録の場合は空のフォームにリセット
+      setFormData({
+        name: '',
+        name_kana: '',
+        birth_date: '',
+        gender: '',
+        address: '',
+        phone: '',
+        email: '',
+        care_level: '',
+        insurance_number: '',
+        certification_date: '',
+        certification_valid_from: '',
+        certification_valid_to: '',
+        notes: '',
+      })
+    }
+  }, [open, client])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -117,70 +154,60 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
             <Typography variant="subtitle2" gutterBottom color="primary">
               基本情報
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="name"
-                  label="氏名"
-                  value={formData.name}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="name_kana"
-                  label="フリガナ"
-                  value={formData.name_kana}
-                  onChange={handleChange}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="birth_date"
-                  label="生年月日"
-                  type="date"
-                  value={formData.birth_date}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="gender"
-                  label="性別"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  fullWidth
-                  select
-                >
-                  <MenuItem value="男性">男性</MenuItem>
-                  <MenuItem value="女性">女性</MenuItem>
-                  <MenuItem value="その他">その他</MenuItem>
-                </TextField>
-              </Grid>
-            </Grid>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+              <TextField
+                name="name"
+                label="氏名"
+                value={formData.name}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                name="name_kana"
+                label="フリガナ"
+                value={formData.name_kana}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                name="birth_date"
+                label="生年月日"
+                type="date"
+                value={formData.birth_date}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                name="gender"
+                label="性別"
+                value={formData.gender}
+                onChange={handleChange}
+                fullWidth
+                select
+              >
+                <MenuItem value="男性">男性</MenuItem>
+                <MenuItem value="女性">女性</MenuItem>
+                <MenuItem value="その他">その他</MenuItem>
+              </TextField>
+            </Box>
 
             <Typography variant="subtitle2" gutterBottom color="primary" sx={{ mt: 3 }}>
               連絡先
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  name="address"
-                  label="住所"
-                  value={formData.address}
-                  onChange={handleChange}
-                  fullWidth
-                  multiline
-                  rows={2}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                name="address"
+                label="住所"
+                value={formData.address}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={2}
+              />
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
                   name="phone"
                   label="電話番号"
@@ -188,8 +215,6 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   onChange={handleChange}
                   fullWidth
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
                 <TextField
                   name="email"
                   label="メールアドレス"
@@ -198,14 +223,14 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   onChange={handleChange}
                   fullWidth
                 />
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
 
             <Typography variant="subtitle2" gutterBottom color="primary" sx={{ mt: 3 }}>
               介護保険情報
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
                   name="care_level"
                   label="要介護度"
@@ -220,8 +245,6 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                     </MenuItem>
                   ))}
                 </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
                 <TextField
                   name="insurance_number"
                   label="被保険者番号"
@@ -229,8 +252,8 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   onChange={handleChange}
                   fullWidth
                 />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
                 <TextField
                   name="certification_date"
                   label="認定日"
@@ -240,8 +263,6 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={4}>
                 <TextField
                   name="certification_valid_from"
                   label="認定有効期間（開始）"
@@ -251,8 +272,6 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={4}>
                 <TextField
                   name="certification_valid_to"
                   label="認定有効期間（終了）"
@@ -262,8 +281,8 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                   fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
 
             <Typography variant="subtitle2" gutterBottom color="primary" sx={{ mt: 3 }}>
               備考

@@ -23,6 +23,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import Link from 'next/link'
 import { Client } from '@/app/lib/types'
 import { createClient as createSupabaseClient } from '@/app/lib/supabase/client'
+import ClientFormDialog from './ClientFormDialog'
 
 export default function ClientList() {
   const [clients, setClients] = useState<Client[]>([])
@@ -30,6 +31,7 @@ export default function ClientList() {
   const [error, setError] = useState<string | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   useEffect(() => {
     fetchClients()
@@ -72,7 +74,17 @@ export default function ClientList() {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleEdit = () => {
+    setAnchorEl(null)
+    setEditDialogOpen(true)
+  }
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false)
     setSelectedClient(null)
+    fetchClients() // ダイアログを閉じたらリストを再取得
   }
 
   const calculateAge = (birthDate: string) => {
@@ -218,10 +230,16 @@ export default function ClientList() {
         >
           スケジュール登録
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleEdit}>
           利用者情報を編集
         </MenuItem>
       </Menu>
+
+      <ClientFormDialog
+        open={editDialogOpen}
+        onClose={handleEditDialogClose}
+        client={selectedClient || undefined}
+      />
     </>
   )
 }
