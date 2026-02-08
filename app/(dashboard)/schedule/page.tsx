@@ -12,10 +12,16 @@ import ScheduleFormDialog from '@/app/components/schedule/ScheduleFormDialog'
 export default function SchedulePage() {
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>()
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
     setSelectedDate(slotInfo.start)
     setOpenDialog(true)
+  }
+
+  const handleSaved = () => {
+    // カレンダーをリフレッシュ
+    setRefreshTrigger(prev => prev + 1)
   }
 
   return (
@@ -36,11 +42,15 @@ export default function SchedulePage() {
         </Button>
       </Box>
 
-      <ScheduleCalendar onSelectSlot={handleSelectSlot} />
+      <ScheduleCalendar
+        onSelectSlot={handleSelectSlot}
+        refreshTrigger={refreshTrigger}
+      />
 
       <ScheduleFormDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
+        onSaved={handleSaved}
         defaultDate={selectedDate}
       />
     </Box>

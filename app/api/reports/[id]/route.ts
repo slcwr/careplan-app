@@ -6,13 +6,14 @@ import { supabaseAdmin } from '@/app/lib/supabase'
 // GET /api/reports/[id] - レポート詳細取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { data, error } = await supabaseAdmin
       .from('care_plan_reports')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) throw error
@@ -30,15 +31,16 @@ export async function GET(
 // PUT /api/reports/[id] - レポート更新
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
 
     const { data, error } = await supabaseAdmin
       .from('care_plan_reports')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -57,13 +59,14 @@ export async function PUT(
 // DELETE /api/reports/[id] - レポート削除
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabaseAdmin
       .from('care_plan_reports')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 

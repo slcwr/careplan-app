@@ -8,12 +8,7 @@ import { ja } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Paper, Box, CircularProgress } from '@mui/material'
 import { Schedule } from '@/app/lib/types'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createClient as createSupabaseClient } from '@/app/lib/supabase/client'
 
 const locales = {
   'ja': ja,
@@ -39,9 +34,10 @@ interface CalendarEvent {
 interface ScheduleCalendarProps {
   onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void
   onSelectEvent?: (event: CalendarEvent) => void
+  refreshTrigger?: number
 }
 
-export default function ScheduleCalendar({ onSelectSlot, onSelectEvent }: ScheduleCalendarProps) {
+export default function ScheduleCalendar({ onSelectSlot, onSelectEvent, refreshTrigger }: ScheduleCalendarProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<View>('month')
@@ -49,16 +45,27 @@ export default function ScheduleCalendar({ onSelectSlot, onSelectEvent }: Schedu
 
   useEffect(() => {
     fetchSchedules()
-  }, [])
+  }, [refreshTrigger])
 
   const fetchSchedules = async () => {
     try {
+      const supabase = createSupabaseClient()
+
+      // 認証されたユーザーを取得
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        console.error('User not authenticated')
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('schedules')
         .select(`
           *,
           client:clients(*)
         `)
+        .eq('user_id', user.id)
         .order('start_time', { ascending: true })
 
       if (error) throw error

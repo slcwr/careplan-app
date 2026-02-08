@@ -9,7 +9,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Grid,
   MenuItem,
   Typography,
   Box,
@@ -24,6 +23,7 @@ import { format } from 'date-fns'
 interface ScheduleFormDialogProps {
   open: boolean
   onClose: () => void
+  onSaved?: () => void
   schedule?: Schedule
   defaultDate?: Date
 }
@@ -45,6 +45,7 @@ const priorities = [
 export default function ScheduleFormDialog({
   open,
   onClose,
+  onSaved,
   schedule,
   defaultDate,
 }: ScheduleFormDialogProps) {
@@ -157,7 +158,9 @@ export default function ScheduleFormDialog({
 
       alert(schedule ? 'スケジュールを更新しました' : 'スケジュールを登録しました')
       onClose()
-      window.location.reload()
+      if (onSaved) {
+        onSaved()
+      }
     } catch (error) {
       console.error('Error saving schedule:', error)
       alert('保存に失敗しました')
@@ -173,165 +176,149 @@ export default function ScheduleFormDialog({
           {schedule ? 'スケジュールの編集' : '新規スケジュール登録'}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  name="title"
-                  label="タイトル"
-                  value={formData.title}
+          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              name="title"
+              label="タイトル"
+              value={formData.title}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+
+            <Autocomplete
+              value={selectedClient}
+              onChange={(_, newValue) => setSelectedClient(newValue)}
+              options={clients}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => (
+                <TextField {...params} label="利用者" />
+              )}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <Box>
+                    <Typography variant="body1">{option.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {option.care_level}
+                    </Typography>
+                  </Box>
+                </li>
+              )}
+            />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+              <TextField
+                name="event_type"
+                label="種類"
+                value={formData.event_type}
+                onChange={handleChange}
+                fullWidth
+                required
+                select
+              >
+                {eventTypes.map((type) => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                name="priority"
+                label="優先度"
+                value={formData.priority}
+                onChange={handleChange}
+                fullWidth
+                select
+              >
+                {priorities.map((priority) => (
+                  <MenuItem key={priority.value} value={priority.value}>
+                    {priority.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+              <TextField
+                name="start_time"
+                label="開始日時"
+                type="datetime-local"
+                value={formData.start_time}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+
+              <TextField
+                name="end_time"
+                label="終了日時"
+                type="datetime-local"
+                value={formData.end_time}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="all_day"
+                  checked={formData.all_day}
                   onChange={handleChange}
-                  fullWidth
-                  required
                 />
-              </Grid>
+              }
+              label="終日"
+            />
 
-              <Grid item xs={12}>
-                <Autocomplete
-                  value={selectedClient}
-                  onChange={(_, newValue) => setSelectedClient(newValue)}
-                  options={clients}
-                  getOptionLabel={(option) => option.name}
-                  renderInput={(params) => (
-                    <TextField {...params} label="利用者" />
-                  )}
-                  renderOption={(props, option) => (
-                    <li {...props}>
-                      <Box>
-                        <Typography variant="body1">{option.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {option.care_level}
-                        </Typography>
-                      </Box>
-                    </li>
-                  )}
-                />
-              </Grid>
+            <TextField
+              name="location"
+              label="場所"
+              value={formData.location}
+              onChange={handleChange}
+              fullWidth
+              placeholder="例: 利用者宅、事業所"
+            />
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="event_type"
-                  label="種類"
-                  value={formData.event_type}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  select
-                >
-                  {eventTypes.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
+            <TextField
+              name="description"
+              label="メモ"
+              value={formData.description}
+              onChange={handleChange}
+              fullWidth
+              multiline
+              rows={3}
+            />
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="priority"
-                  label="優先度"
-                  value={formData.priority}
-                  onChange={handleChange}
-                  fullWidth
-                  select
-                >
-                  {priorities.map((priority) => (
-                    <MenuItem key={priority.value} value={priority.value}>
-                      {priority.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="start_time"
-                  label="開始日時"
-                  type="datetime-local"
-                  value={formData.start_time}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="end_time"
-                  label="終了日時"
-                  type="datetime-local"
-                  value={formData.end_time}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="all_day"
-                      checked={formData.all_day}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="終日"
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  name="location"
-                  label="場所"
-                  value={formData.location}
-                  onChange={handleChange}
-                  fullWidth
-                  placeholder="例: 利用者宅、事業所"
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  name="description"
-                  label="メモ"
-                  value={formData.description}
-                  onChange={handleChange}
-                  fullWidth
-                  multiline
-                  rows={3}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" gutterBottom>
-                  リマインダー設定
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="reminder_enabled"
-                      checked={formData.reminder_enabled}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="リマインダーを有効にする"
-                />
-                {formData.reminder_enabled && (
-                  <TextField
-                    name="reminder_time"
-                    label="何時間前に通知"
-                    type="number"
-                    value={formData.reminder_time}
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                リマインダー設定
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="reminder_enabled"
+                    checked={formData.reminder_enabled}
                     onChange={handleChange}
-                    fullWidth
-                    sx={{ mt: 1 }}
                   />
-                )}
-              </Grid>
-            </Grid>
+                }
+                label="リマインダーを有効にする"
+              />
+              {formData.reminder_enabled && (
+                <TextField
+                  name="reminder_time"
+                  label="何時間前に通知"
+                  type="number"
+                  value={formData.reminder_time}
+                  onChange={handleChange}
+                  fullWidth
+                  sx={{ mt: 1 }}
+                />
+              )}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

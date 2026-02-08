@@ -24,9 +24,11 @@ interface ReportFormProps {
 
 export default function ReportForm({ initialData, onSubmit, isLoading, submitLabel, disabled }: ReportFormProps) {
   const [formData, setFormData] = useState({
-    client_name: initialData?.client_name ?? '',
-    client_age: initialData?.client_age?.toString() ?? '',
-    care_level: initialData?.care_level ?? '',
+    client_name: initialData?.client?.name ?? '',
+    client_age: initialData?.client?.birth_date
+      ? String(Math.floor((Date.now() - new Date(initialData.client.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000)))
+      : '',
+    care_level: initialData?.client?.care_level ?? '',
     life_issues: initialData?.life_issues ?? '',
     long_term_goal: initialData?.long_term_goal ?? '',
     remarks: initialData?.remarks ?? '',
@@ -37,9 +39,6 @@ export default function ReportForm({ initialData, onSubmit, isLoading, submitLab
 
     // 文字列から適切な型に変換
     const submitData: Partial<CarePlanReport> = {
-      client_name: formData.client_name,
-      client_age: formData.client_age ? parseInt(formData.client_age, 10) : null,
-      care_level: formData.care_level || null,
       life_issues: formData.life_issues || null,
       long_term_goal: formData.long_term_goal || null,
       remarks: formData.remarks || null,

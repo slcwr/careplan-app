@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -16,8 +16,9 @@ import { CarePlanReport } from '@/app/lib/types'
 export default function ReportDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = use(params)
   const [report, setReport] = useState<CarePlanReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +26,7 @@ export default function ReportDetailPage({
   useEffect(() => {
     async function fetchReport() {
       try {
-        const response = await fetch(`/api/reports/${params.id}`)
+        const response = await fetch(`/api/reports/${id}`)
         const data = await response.json()
 
         if (data.success) {
@@ -42,7 +43,7 @@ export default function ReportDetailPage({
     }
 
     fetchReport()
-  }, [params.id])
+  }, [id])
 
   if (loading) {
     return (
@@ -96,7 +97,7 @@ export default function ReportDetailPage({
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            href={`/reports/${params.id}/edit`}
+            href={`/reports/${id}/edit`}
           >
             編集
           </Button>

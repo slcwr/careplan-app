@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -14,8 +14,9 @@ import { CarePlanReport } from '@/app/lib/types'
 export default function ReportEditPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = use(params)
   const router = useRouter()
   const [report, setReport] = useState<CarePlanReport | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,7 +26,7 @@ export default function ReportEditPage({
   useEffect(() => {
     async function fetchReport() {
       try {
-        const response = await fetch(`/api/reports/${params.id}`)
+        const response = await fetch(`/api/reports/${id}`)
         const data = await response.json()
 
         if (data.success) {
@@ -42,14 +43,14 @@ export default function ReportEditPage({
     }
 
     fetchReport()
-  }, [params.id])
+  }, [id])
 
   const handleSubmit = async (data: Partial<CarePlanReport>) => {
     setSaving(true)
     setError(null)
 
     try {
-      const response = await fetch(`/api/reports/${params.id}`, {
+      const response = await fetch(`/api/reports/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ export default function ReportEditPage({
 
       if (result.success) {
         // 成功したら詳細ページに遷移
-        router.push(`/reports/${params.id}`)
+        router.push(`/reports/${id}`)
       } else {
         setError('更新に失敗しました')
       }
